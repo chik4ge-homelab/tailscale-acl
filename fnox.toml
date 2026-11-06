@@ -1,0 +1,5 @@
+[providers.onepass]
+type = "1password"
+
+[secrets]
+SOPS_AGE_KEY_FILE = { provider = "onepass", value = "op://homelab/zsxlyuarjig56ewnycpemqq2we/notesPlain", env = "exec", as_file = true }

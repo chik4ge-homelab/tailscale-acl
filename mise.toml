@@ -1,2 +1,2 @@
-[env]
-SOPS_AGE_KEY_CMD = "op read op://homelab/zsxlyuarjig56ewnycpemqq2we/notesPlain"
+[tools]
+sops = "3.13.3"

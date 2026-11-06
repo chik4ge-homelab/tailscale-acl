@@ -6,7 +6,7 @@ The current policy is in the ignored local file `policy.hujson`. The encrypted f
 
 ## Key management
 
-The repo-specific age private key is stored in the `homelab` 1Password vault as the Secure Note **Tailscale ACL repo SOPS age key**. `mise.toml` retrieves it through 1Password when running SOPS locally. GitHub Actions uses the repository secret `SOPS_AGE_KEY` for CI decryption. The public age recipient is in `.sops.yaml`.
+The repo-specific age private key is stored in the `homelab` 1Password vault as the Secure Note **Tailscale ACL repo SOPS age key**. `fnox.toml` retrieves it through 1Password as a temporary local file and exports its path as `SOPS_AGE_KEY_FILE` only to the command started by fnox. GitHub Actions uses the repository secret `SOPS_AGE_KEY` for CI decryption. The public age recipient is in `.sops.yaml`.
 
 The Tailscale credentials are separate repository Actions secrets:
 
@@ -29,15 +29,15 @@ mise exec -- sops --encrypt \
   policy.hujson > policy.hujson.sops.json
 ```
 
-Verify decryption without printing the policy:
+Verify local decryption without printing the policy:
 
 ```sh
-mise exec -- sops --decrypt \
+mise exec -- fnox --non-interactive --if-missing error --no-daemon exec sops --decrypt \
   --input-type json \
   --output-type binary \
   policy.hujson.sops.json > /dev/null
 ```
 
-`policy.hujson` is ignored by Git. Do not print or commit the private age key or plaintext policy.
+`policy.hujson` is ignored by Git. Do not print or commit the private age key or plaintext policy. The private key is materialized only for the duration of a fnox command.
 
 Tailscale policy files can contain personal information such as user email addresses. See [Tailscale GitOps for GitHub Actions](https://tailscale.com/docs/integrations/github/gitops), [Tailscale policy syntax](https://tailscale.com/docs/reference/syntax/policy-file), and [SOPS binary format](https://getsops.io/docs/usage/advanced/).
