@@ -1,0 +1,93 @@
+{
+  "grants": [
+    {
+      "src": [
+        "group:admin"
+      ],
+      "dst": [
+        "*"
+      ],
+      "ip": [
+        "*"
+      ]
+    },
+    {
+      "src": [
+        "tag:gatus"
+      ],
+      "dst": [
+        "*"
+      ],
+      "ip": [
+        "*"
+      ]
+    },
+    {
+      "src": [
+        "tag:oci-edge"
+      ],
+      "dst": [
+        "tag:k8s"
+      ],
+      "ip": [
+        "tcp:*"
+      ]
+    },
+    {
+      "src": [
+        "tag:ark-server"
+      ],
+      "dst": [
+        "tag:truenas"
+      ],
+      "ip": [
+        "445"
+      ]
+    },
+    {
+      "src": [
+        "tag:ci"
+      ],
+      "dst": [
+        "tag:gatus-deploy"
+      ],
+      "ip": [
+        "tcp:22"
+      ]
+    },
+    {
+      "src": [
+        "tag:gatus-deploy"
+      ],
+      "dst": [
+        "tag:k8s"
+      ],
+      "ip": [
+        "tcp:443"
+      ]
+    },
+    {
+      "src": [
+        "group:admin"
+      ],
+      "dst": [
+        "tag:k8s"
+      ],
+      "ip": [
+        "tcp:443",
+        "tcp:25565"
+      ]
+    },
+    {
+      "src": [
+        "tag:k8s"
+      ],
+      "dst": [
+        "tag:oci-edge"
+      ],
+      "ip": [
+        "tcp:8405"
+      ]
+    }
+  ]
+}

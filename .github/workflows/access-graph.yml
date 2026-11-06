@@ -1,0 +1,58 @@
+name: Update Tailscale access graph
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+    paths:
+      - policy/grants.json
+      - policy/ssh.json
+      - scripts/policy-graph.py
+      - .github/workflows/access-graph.yml
+
+concurrency:
+  group: access-graph-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Install Graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes graphviz
+
+      - name: Generate access graph
+        run: |
+          python3 scripts/policy-graph.py policy/grants.json policy/ssh.json \
+            > "$RUNNER_TEMP/access-graph.dot"
+          mkdir -p docs
+          dot -Tsvg "$RUNNER_TEMP/access-graph.dot" -o docs/access-graph.svg
+
+      - name: Commit graph when changed
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- docs/access-graph.svg
+          if git diff --cached --quiet -- docs/access-graph.svg; then
+            echo "Access graph is unchanged"
+            exit 0
+          fi
+          git commit -m "Update Tailscale access graph"
+          git push origin "HEAD:refs/heads/${HEAD_REF}"

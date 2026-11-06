@@ -1,3 +1,9 @@
+# Local plaintext policy data and rendered policies
 /policy.hujson
+/policy.secrets.json
+/secrets.json
+/build/
+
+# Local age keys
 /*.agekey
 /age-key.txt

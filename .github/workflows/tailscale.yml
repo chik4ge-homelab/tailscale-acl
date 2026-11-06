@@ -3,10 +3,18 @@ name: Sync Tailscale ACLs
 on:
   push:
     branches: [main]
-    paths: [policy.hujson.sops.json]
+    paths:
+      - policy/**
+      - secrets.sops.json
+      - scripts/render-policy.sh
+      - .github/workflows/tailscale.yml
   pull_request:
     branches: [main]
-    paths: [policy.hujson.sops.json]
+    paths:
+      - policy/**
+      - secrets.sops.json
+      - scripts/render-policy.sh
+      - .github/workflows/tailscale.yml
   workflow_dispatch:
 
 jobs:
@@ -14,7 +22,8 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     env:
-      TAILSCALE_CREDENTIALS_CONFIGURED: ${{ secrets.TS_OAUTH_ID != '' && secrets.TS_AUDIENCE != '' && secrets.TS_TAILNET != '' }}
+      TAILSCALE_CREDENTIALS_CONFIGURED: >-
+        ${{ secrets.TS_OAUTH_ID != '' && secrets.TS_AUDIENCE != '' && secrets.TS_TAILNET != '' }}
     permissions:
       contents: read
       id-token: write
@@ -26,15 +35,20 @@ jobs:
         env:
           SOPS_VERSION: 3.13.3
         run: |
-          curl -fsSL -o "sops-v${SOPS_VERSION}.linux.amd64" "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.linux.amd64"
-          curl -fsSL -o checksums.txt "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.checksums.txt"
+          curl -fsSL \
+            -o "sops-v${SOPS_VERSION}.linux.amd64" \
+            "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.linux.amd64"
+          curl -fsSL \
+            -o checksums.txt \
+            "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.checksums.txt"
           grep "sops-v${SOPS_VERSION}.linux.amd64$" checksums.txt | sha256sum --check -
           sudo install -m 0755 "sops-v${SOPS_VERSION}.linux.amd64" /usr/local/bin/sops
 
-      - name: Decrypt policy
+      - name: Render policy
+        id: render
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-        run: sops --decrypt --input-type json --output-type binary policy.hujson.sops.json > policy.hujson
+        run: scripts/render-policy.sh
 
       - name: Test policy
         if: github.event_name == 'pull_request' && env.TAILSCALE_CREDENTIALS_CONFIGURED == 'true'
@@ -43,7 +57,7 @@ jobs:
           oauth-client-id: ${{ secrets.TS_OAUTH_ID }}
           audience: ${{ secrets.TS_AUDIENCE }}
           tailnet: ${{ secrets.TS_TAILNET }}
-          policy-file: policy.hujson
+          policy-file: ${{ steps.render.outputs.policy_file }}
           action: test
 
       - name: Apply policy
@@ -53,5 +67,15 @@ jobs:
           oauth-client-id: ${{ secrets.TS_OAUTH_ID }}
           audience: ${{ secrets.TS_AUDIENCE }}
           tailnet: ${{ secrets.TS_TAILNET }}
-          policy-file: policy.hujson
+          policy-file: ${{ steps.render.outputs.policy_file }}
           action: apply
+
+      - name: Remove rendered policy
+        if: always()
+        env:
+          POLICY_FILE: ${{ steps.render.outputs.policy_file }}
+        run: |
+          if [ -n "${POLICY_FILE}" ]; then
+            rm -f -- "${POLICY_FILE}"
+            rmdir -- "$(dirname -- "${POLICY_FILE}")" 2>/dev/null || true
+          fi
