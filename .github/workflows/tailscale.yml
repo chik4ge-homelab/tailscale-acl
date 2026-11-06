@@ -3,10 +3,10 @@ name: Sync Tailscale ACLs
 on:
   push:
     branches: [main]
-    paths: [policy.json.sops]
+    paths: [policy.hujson.sops.json]
   pull_request:
     branches: [main]
-    paths: [policy.json.sops]
+    paths: [policy.hujson.sops.json]
 
 jobs:
   policy:
@@ -31,7 +31,7 @@ jobs:
       - name: Decrypt policy
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-        run: sops --decrypt --input-type json --output-type json policy.json.sops > policy.hujson
+        run: sops --decrypt --input-type json --output-type binary policy.hujson.sops.json > policy.hujson
 
       - name: Test policy
         if: github.event_name == 'pull_request'
