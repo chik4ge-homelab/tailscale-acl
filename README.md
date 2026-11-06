@@ -46,18 +46,28 @@ Secure Note **Tailscale ACL repo SOPS age key**. `fnox.toml` retrieves it throug
 the command started by fnox. GitHub Actions uses the repository secret `SOPS_AGE_KEY`
 for CI decryption. The public age recipient is in `.sops.yaml`.
 
-The Tailscale credentials are separate repository Actions secrets:
+GitHub Actions uses a read-only Tailscale identity for pull request tests and a
+write identity restricted to `main` for deployment. Configure these repository
+Actions variables:
 
-| Secret | Value |
+| Variable | Value |
 | --- | --- |
-| `TS_OAUTH_ID` | Tailscale federated identity client ID |
-| `TS_AUDIENCE` | Audience configured for that identity |
-| `TS_TAILNET` | Tailnet name |
+| `TS_OAUTH_ID_READ` | Client ID of the read-only federated identity |
+| `TS_AUDIENCE_READ` | Audience of the read-only identity |
+| `TS_OAUTH_ID_WRITE` | Client ID of the write federated identity |
+| `TS_AUDIENCE_WRITE` | Audience of the write identity |
+| `TS_TAILNET` | Tailnet name (`chik4ge-homelab.org.github`) |
 
-Configure the federated identity with the `policy_file` scope and restrict its GitHub
-trust conditions to this repository. Pull requests run the Tailscale policy test when
-all three credentials are configured. Pushes to `main` apply the policy when all three
-credentials are configured. `workflow_dispatch` renders the policy only.
+In Tailscale, create two GitHub OpenID Connect federated identities with issuer
+`https://token.actions.githubusercontent.com`. Restrict their subjects to the exact
+immutable GitHub subjects below; do not use a wildcard:
+
+| Identity | Subject | Scopes |
+| --- | --- | --- |
+| PR test | `repo:chik4ge-homelab@192598607/tailscale-acl@1448596926:pull_request` | `policy_file:read`; the console adds its required read-only device scopes |
+| Main deploy | `repo:chik4ge-homelab@192598607/tailscale-acl@1448596926:ref:refs/heads/main` | `policy_file`; the console adds its required device scopes |
+
+Leave the audience field empty to use Tailscale's generated audience (`api.tailscale.com/<client ID>`), then copy each identity's client ID and audience into the matching GitHub variables above. Pull requests use only the read identity; pushes to `main` use only the write identity. The only GitHub Actions secret needed for policy rendering is `SOPS_AGE_KEY`. `workflow_dispatch` renders the policy only.
 
 ## Editing and encryption
 
