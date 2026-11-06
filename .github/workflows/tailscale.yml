@@ -1,0 +1,54 @@
+name: Sync Tailscale ACLs
+
+on:
+  push:
+    branches: [main]
+    paths: [policy.json.sops]
+  pull_request:
+    branches: [main]
+    paths: [policy.json.sops]
+
+jobs:
+  policy:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install SOPS
+        env:
+          SOPS_VERSION: 3.13.3
+        run: |
+          curl -fsSL -o sops "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.linux.amd64"
+          curl -fsSL -o checksums.txt "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.checksums.txt"
+          grep "sops-v${SOPS_VERSION}.linux.amd64$" checksums.txt | sha256sum --check -
+          sudo install -m 0755 sops /usr/local/bin/sops
+
+      - name: Decrypt policy
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: sops --decrypt --input-type json --output-type json policy.json.sops > policy.hujson
+
+      - name: Test policy
+        if: github.event_name == 'pull_request'
+        uses: tailscale/gitops-acl-action@v1
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_ID }}
+          audience: ${{ secrets.TS_AUDIENCE }}
+          tailnet: ${{ secrets.TS_TAILNET }}
+          policy-file: policy.hujson
+          action: test
+
+      - name: Apply policy
+        if: github.event_name == 'push'
+        uses: tailscale/gitops-acl-action@v1
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_ID }}
+          audience: ${{ secrets.TS_AUDIENCE }}
+          tailnet: ${{ secrets.TS_TAILNET }}
+          policy-file: policy.hujson
+          action: apply
