@@ -7,6 +7,7 @@ on:
   pull_request:
     branches: [main]
     paths: [policy.hujson.sops.json]
+  workflow_dispatch:
 
 jobs:
   policy:
@@ -25,10 +26,10 @@ jobs:
         env:
           SOPS_VERSION: 3.13.3
         run: |
-          curl -fsSL -o sops "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.linux.amd64"
+          curl -fsSL -o "sops-v${SOPS_VERSION}.linux.amd64" "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.linux.amd64"
           curl -fsSL -o checksums.txt "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.checksums.txt"
           grep "sops-v${SOPS_VERSION}.linux.amd64$" checksums.txt | sha256sum --check -
-          sudo install -m 0755 sops /usr/local/bin/sops
+          sudo install -m 0755 "sops-v${SOPS_VERSION}.linux.amd64" /usr/local/bin/sops
 
       - name: Decrypt policy
         env:
