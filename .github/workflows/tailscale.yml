@@ -22,8 +22,10 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     env:
-      TAILSCALE_CREDENTIALS_CONFIGURED: >-
-        ${{ secrets.TS_OAUTH_ID != '' && secrets.TS_AUDIENCE != '' && secrets.TS_TAILNET != '' }}
+      TAILSCALE_READ_CREDENTIALS_CONFIGURED: >-
+        ${{ vars.TS_OAUTH_ID_READ != '' && vars.TS_AUDIENCE_READ != '' && vars.TS_TAILNET != '' }}
+      TAILSCALE_WRITE_CREDENTIALS_CONFIGURED: >-
+        ${{ vars.TS_OAUTH_ID_WRITE != '' && vars.TS_AUDIENCE_WRITE != '' && vars.TS_TAILNET != '' }}
     permissions:
       contents: read
       id-token: write
@@ -51,22 +53,22 @@ jobs:
         run: scripts/render-policy.sh
 
       - name: Test policy
-        if: github.event_name == 'pull_request' && env.TAILSCALE_CREDENTIALS_CONFIGURED == 'true'
+        if: github.event_name == 'pull_request' && env.TAILSCALE_READ_CREDENTIALS_CONFIGURED == 'true'
         uses: tailscale/gitops-acl-action@v1
         with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_ID }}
-          audience: ${{ secrets.TS_AUDIENCE }}
-          tailnet: ${{ secrets.TS_TAILNET }}
+          oauth-client-id: ${{ vars.TS_OAUTH_ID_READ }}
+          audience: ${{ vars.TS_AUDIENCE_READ }}
+          tailnet: ${{ vars.TS_TAILNET }}
           policy-file: ${{ steps.render.outputs.policy_file }}
           action: test
 
       - name: Apply policy
-        if: github.event_name == 'push' && env.TAILSCALE_CREDENTIALS_CONFIGURED == 'true'
+        if: github.event_name == 'push' && env.TAILSCALE_WRITE_CREDENTIALS_CONFIGURED == 'true'
         uses: tailscale/gitops-acl-action@v1
         with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_ID }}
-          audience: ${{ secrets.TS_AUDIENCE }}
-          tailnet: ${{ secrets.TS_TAILNET }}
+          oauth-client-id: ${{ vars.TS_OAUTH_ID_WRITE }}
+          audience: ${{ vars.TS_AUDIENCE_WRITE }}
+          tailnet: ${{ vars.TS_TAILNET }}
           policy-file: ${{ steps.render.outputs.policy_file }}
           action: apply
 
