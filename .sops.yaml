@@ -1,3 +1,7 @@
 creation_rules:
-  - path_regex: ^policy\.hujson$
+  - path_regex: ^secrets(\.sops)?\.json$
+    encrypted_regex: '^group:.*$'
     age: age1kshzptvpcfxtt6ees58jtdvcr4vylqmh07xlgp068slsdj73esdqqr7en6
+stores:
+  json:
+    indent: 2

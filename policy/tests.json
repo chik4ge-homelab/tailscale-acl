@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "src": "tag:ark-server",
+      "accept": [
+        "tag:truenas:445"
+      ],
+      "deny": [
+        "tag:truenas:22",
+        "tag:truenas:443"
+      ]
+    }
+  ]
+}

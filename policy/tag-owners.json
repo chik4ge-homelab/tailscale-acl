@@ -1,0 +1,26 @@
+{
+  "tagOwners": {
+    "tag:proxmox": [
+      "group:admin"
+    ],
+    "tag:k8s-operator": [],
+    "tag:k8s": [
+      "tag:k8s-operator"
+    ],
+    "tag:gatus": [
+      "autogroup:admin"
+    ],
+    "tag:truenas": [
+      "group:admin"
+    ],
+    "tag:ark-server": [
+      "group:admin",
+      "group:kudamono"
+    ],
+    "tag:ci": [],
+    "tag:gatus-deploy": [],
+    "tag:oci-edge": [
+      "group:admin"
+    ]
+  }
+}

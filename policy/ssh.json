@@ -1,0 +1,31 @@
+{
+  "ssh": [
+    {
+      "action": "accept",
+      "src": [
+        "group:admin"
+      ],
+      "dst": [
+        "autogroup:self",
+        "tag:ark-server"
+      ],
+      "users": [
+        "autogroup:nonroot",
+        "root"
+      ]
+    },
+    {
+      "action": "accept",
+      "src": [
+        "tag:ci",
+        "group:admin"
+      ],
+      "dst": [
+        "tag:gatus-deploy"
+      ],
+      "users": [
+        "ubuntu"
+      ]
+    }
+  ]
+}
