@@ -1,0 +1,3 @@
+creation_rules:
+  - path_regex: ^policy\.hujson$
+    age: age1kshzptvpcfxtt6ees58jtdvcr4vylqmh07xlgp068slsdj73esdqqr7en6

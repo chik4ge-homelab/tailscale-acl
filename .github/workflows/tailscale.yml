@@ -12,6 +12,8 @@ jobs:
   policy:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    env:
+      TAILSCALE_CREDENTIALS_CONFIGURED: ${{ secrets.TS_OAUTH_ID != '' && secrets.TS_AUDIENCE != '' && secrets.TS_TAILNET != '' }}
     permissions:
       contents: read
       id-token: write
@@ -34,7 +36,7 @@ jobs:
         run: sops --decrypt --input-type json --output-type binary policy.hujson.sops.json > policy.hujson
 
       - name: Test policy
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && env.TAILSCALE_CREDENTIALS_CONFIGURED == 'true'
         uses: tailscale/gitops-acl-action@v1
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_ID }}
@@ -44,7 +46,7 @@ jobs:
           action: test
 
       - name: Apply policy
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && env.TAILSCALE_CREDENTIALS_CONFIGURED == 'true'
         uses: tailscale/gitops-acl-action@v1
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_ID }}

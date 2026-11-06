@@ -1,47 +1,43 @@
 # Tailscale ACL
 
-GitOps source for the Tailscale tailnet policy. The repository is public, so the policy must be committed as a SOPS-encrypted file. GitHub Actions decrypts it only for validation and deployment.
+GitOps source for the Tailscale tailnet policy. This repository is public; only the SOPS-encrypted policy is committed.
 
-Place the current policy in the ignored local file `policy.hujson` at the repository root. The encrypted file `policy.hujson.sops.json` is the only policy file that should be committed. The current live policy is not included in Git yet.
+The current policy is in the ignored local file `policy.hujson`. The encrypted file `policy.hujson.sops.json` is the only policy file to commit.
 
-## Encrypt the policy
+## Key management
 
-Create a dedicated age key outside the repository and store its private key in a password manager:
+The repo-specific age private key is stored in the `homelab` 1Password vault as the Secure Note **Tailscale ACL repo SOPS age key**. `mise.toml` retrieves it through 1Password when running SOPS locally. GitHub Actions uses the repository secret `SOPS_AGE_KEY` for CI decryption. The public age recipient is in `.sops.yaml`.
 
-```sh
-mkdir -p ~/.config/sops/age
-age-keygen -o ~/.config/sops/age/tailscale-acl.agekey
-```
-
-Keep `~/.config/sops/age/tailscale-acl.agekey` private. Encrypt the HuJSON file as a SOPS binary payload so comments and trailing commas are preserved:
-
-```sh
-sops --encrypt \
-  --input-type binary \
-  --output-type json \
-  --age "$(age-keygen -y ~/.config/sops/age/tailscale-acl.agekey)" \
-  policy.hujson > policy.hujson.sops.json
-```
-
-`policy.hujson` is ignored by Git. SOPS stores the encrypted binary payload in a JSON envelope; decryption restores the original HuJSON bytes.
-
-## Configure GitHub Actions
-
-Add these repository Actions secrets:
+The Tailscale credentials are separate repository Actions secrets:
 
 | Secret | Value |
 | --- | --- |
-| `SOPS_AGE_KEY` | Private key from `~/.config/sops/age/tailscale-acl.agekey` |
 | `TS_OAUTH_ID` | Tailscale federated identity client ID |
 | `TS_AUDIENCE` | Audience configured for that identity |
 | `TS_TAILNET` | Tailnet name |
 
-Configure the Tailscale federated identity with the `policy_file` scope and restrict its GitHub trust conditions to this repository. The private age key and Tailscale credentials are only used by Actions; do not commit them.
+Configure the federated identity with the `policy_file` scope and restrict its GitHub trust conditions to this repository. Until all three Tailscale secrets are set, the workflow decrypts the policy but skips the Tailscale test/apply step.
 
-The workflow tests policy changes on pull requests and applies them to the tailnet after a push to `main`. Pull requests from forks are skipped so they cannot access repository secrets.
+## Encrypt and verify
 
-## Security
+The policy stays as HuJSON locally. SOPS binary mode preserves the original bytes, including comments and trailing commas:
 
-Tailscale policy files can contain personal information such as user email addresses. This public repository stores the policy encrypted; review the decrypted policy locally before encrypting it and keep the age private key separate from Git.
+```sh
+mise exec -- sops --encrypt \
+  --input-type binary \
+  --output-type json \
+  policy.hujson > policy.hujson.sops.json
+```
 
-See [Tailscale GitOps for GitHub Actions](https://tailscale.com/docs/integrations/github/gitops) for the policy sync action, [Tailscale policy syntax](https://tailscale.com/docs/reference/syntax/policy-file), and [SOPS binary format](https://getsops.io/docs/usage/advanced/).
+Verify decryption without printing the policy:
+
+```sh
+mise exec -- sops --decrypt \
+  --input-type json \
+  --output-type binary \
+  policy.hujson.sops.json > /dev/null
+```
+
+`policy.hujson` is ignored by Git. Do not print or commit the private age key or plaintext policy.
+
+Tailscale policy files can contain personal information such as user email addresses. See [Tailscale GitOps for GitHub Actions](https://tailscale.com/docs/integrations/github/gitops), [Tailscale policy syntax](https://tailscale.com/docs/reference/syntax/policy-file), and [SOPS binary format](https://getsops.io/docs/usage/advanced/).
