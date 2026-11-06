@@ -9,6 +9,19 @@
         "tag:truenas:22",
         "tag:truenas:443"
       ]
+    },
+    {
+      "src": "tag:gatus",
+      "accept": [
+        "tag:k8s:443"
+      ],
+      "deny": [
+        "tag:k8s:22",
+        "tag:k8s:25565",
+        "tag:proxmox:8006",
+        "tag:truenas:445",
+        "tag:oci-edge:8405"
+      ]
     }
   ]
 }
