@@ -2,17 +2,6 @@
   "grants": [
     {
       "src": [
-        "group:admin"
-      ],
-      "dst": [
-        "*"
-      ],
-      "ip": [
-        "*"
-      ]
-    },
-    {
-      "src": [
         "tag:gatus"
       ],
       "dst": [
@@ -46,7 +35,8 @@
     },
     {
       "src": [
-        "tag:ci"
+        "tag:ci",
+        "group:admin"
       ],
       "dst": [
         "tag:gatus-deploy"
@@ -76,6 +66,62 @@
       "ip": [
         "tcp:443",
         "tcp:25565"
+      ]
+    },
+    {
+      "src": [
+        "group:admin"
+      ],
+      "dst": [
+        "autogroup:self"
+      ],
+      "ip": [
+        "tcp:22"
+      ]
+    },
+    {
+      "src": [
+        "group:admin"
+      ],
+      "dst": [
+        "tag:ark-server"
+      ],
+      "ip": [
+        "tcp:22"
+      ]
+    },
+    {
+      "src": [
+        "group:admin"
+      ],
+      "dst": [
+        "tag:proxmox"
+      ],
+      "ip": [
+        "tcp:8006"
+      ]
+    },
+    {
+      "src": [
+        "group:admin"
+      ],
+      "dst": [
+        "tag:oci-edge"
+      ],
+      "ip": [
+        "tcp:22"
+      ]
+    },
+    {
+      "src": [
+        "tag:codex"
+      ],
+      "dst": [
+        "private-control-plane"
+      ],
+      "ip": [
+        "tcp:6443",
+        "tcp:50000"
       ]
     },
     {

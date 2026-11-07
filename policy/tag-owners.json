@@ -21,6 +21,9 @@
     "tag:gatus-deploy": [],
     "tag:oci-edge": [
       "group:admin"
+    ],
+    "tag:codex": [
+      "group:admin"
     ]
   }
 }

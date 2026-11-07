@@ -1,6 +1,29 @@
 {
   "tests": [
     {
+      "src": "group:admin",
+      "proto": "tcp",
+      "accept": [
+        "tag:k8s:443",
+        "tag:k8s:25565",
+        "tag:ark-server:22",
+        "tag:gatus-deploy:22",
+        "tag:proxmox:8006",
+        "tag:oci-edge:22"
+      ],
+      "deny": [
+        "group:admin:443",
+        "tag:k8s:22",
+        "tag:truenas:445",
+        "tag:proxmox:22",
+        "tag:oci-edge:443",
+        "private-control-plane:6443",
+        "private-control-plane:50000",
+        "tag:codex:22",
+        "tag:codex:443"
+      ]
+    },
+    {
       "src": "tag:ark-server",
       "accept": [
         "tag:truenas:445"
@@ -21,6 +44,24 @@
         "tag:proxmox:8006",
         "tag:truenas:445",
         "tag:oci-edge:8405"
+      ]
+    },
+    {
+      "src": "tag:codex",
+      "proto": "tcp",
+      "accept": [
+        "private-control-plane:6443",
+        "private-control-plane:50000"
+      ],
+      "deny": [
+        "private-control-plane:22",
+        "private-control-plane:443",
+        "tag:k8s:443",
+        "tag:proxmox:8006",
+        "tag:oci-edge:22",
+        "tag:truenas:445",
+        "group:admin:22",
+        "group:admin:443"
       ]
     }
   ]
