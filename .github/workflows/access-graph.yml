@@ -22,7 +22,7 @@ jobs:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v6
@@ -30,6 +30,7 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Install Graphviz
         run: |
@@ -45,6 +46,7 @@ jobs:
 
       - name: Commit graph when changed
         env:
+          ACCESS_GRAPH_TOKEN: ${{ secrets.ACCESS_GRAPH_TOKEN }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           git config user.name "github-actions[bot]"
@@ -54,5 +56,11 @@ jobs:
             echo "Access graph is unchanged"
             exit 0
           fi
+          if [ -z "${ACCESS_GRAPH_TOKEN:-}" ]; then
+            echo "::error::Set the ACCESS_GRAPH_TOKEN repository secret to push generated graph updates."
+            exit 1
+          fi
           git commit -m "Update Tailscale access graph"
-          git push origin "HEAD:refs/heads/${HEAD_REF}"
+          auth_header="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$ACCESS_GRAPH_TOKEN" | base64 --wrap=0)"
+          git -c "http.https://github.com/.extraheader=$auth_header" \
+            push origin "HEAD:refs/heads/${HEAD_REF}"

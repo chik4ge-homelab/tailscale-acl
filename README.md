@@ -67,7 +67,7 @@ immutable GitHub subjects below; do not use a wildcard:
 | PR test | `repo:chik4ge-homelab@192598607/tailscale-acl@1448596926:pull_request` | `policy_file:read`; the console adds its required read-only device scopes |
 | Main deploy | `repo:chik4ge-homelab@192598607/tailscale-acl@1448596926:ref:refs/heads/main` | `policy_file`; the console adds its required device scopes |
 
-Leave the audience field empty to use Tailscale's generated audience (`api.tailscale.com/<client ID>`), then copy each identity's client ID and audience into the matching GitHub variables above. Pull requests use only the read identity; pushes to `main` use only the write identity. The only GitHub Actions secret needed for policy rendering is `SOPS_AGE_KEY`. `workflow_dispatch` renders the policy only.
+Leave the audience field empty to use Tailscale's generated audience (`api.tailscale.com/<client ID>`), then copy each identity's client ID and audience into the matching GitHub variables above. Pull requests use only the read identity; pushes to `main` use only the write identity. `SOPS_AGE_KEY` is the GitHub Actions secret used for policy rendering. `workflow_dispatch` renders the policy only.
 
 ## Editing and encryption
 
@@ -121,9 +121,13 @@ credentials are configured.
 
 The access-graph workflow regenerates the SVG from `policy/grants.json` and
 `policy/ssh.json`. If it changes, the workflow commits the new image to the PR branch,
-so the README preview shows the updated graph. Group membership is not included, and
-unrecognized selectors use generic labels. Blue edges are grants and orange edges are
-SSH; green nodes are groups and blue nodes are tags.
+so the README preview shows the updated graph. Add the `ACCESS_GRAPH_TOKEN` repository
+Actions secret for this push. Use a fine-grained token scoped to this repository with
+only `Contents: Read and write`; store it in the `homelab` 1Password vault as
+**Tailscale ACL graph updater token**. The workflow uses the token only for the graph
+commit and keeps `GITHUB_TOKEN` read-only.
+Group membership is not included, and unrecognized selectors use generic labels. Blue
+edges are grants and orange edges are SSH; green nodes are groups and blue nodes are tags.
 
 See [Tailscale GitOps for GitHub Actions](https://tailscale.com/docs/integrations/github/gitops)
 and [Tailscale policy syntax](https://tailscale.com/docs/reference/syntax/policy-file).
