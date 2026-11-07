@@ -9,7 +9,7 @@ Tailscale JSON sections. The build creates one policy file for Tailscale.
 * `policy/ssh.json`: plaintext `ssh` rules.
 * `policy/tests.json`: plaintext policy tests.
 * `policy/tag-owners.json`: plaintext tag names and owners.
-* `secrets.sops.json`: group membership data encrypted with SOPS + age.
+* `secrets.sops.json`: encrypted group membership and private host addresses.
 * `scripts/render-policy.sh`: merges the fragments into a mode `0600` policy file in a
   temporary directory.
 * `scripts/policy-graph.py`: creates a Graphviz view from the plaintext grant and SSH
@@ -18,17 +18,35 @@ Tailscale JSON sections. The build creates one policy file for Tailscale.
 * `docs/access-graph.svg`: generated image shown below and refreshed automatically on
   same-repository pull requests when grant or SSH rules change.
 
-The SOPS `encrypted_regex` in `.sops.yaml` matches keys beginning with `group:`. This
-encrypts group membership values while keeping group names visible as JSON keys. SOPS
-leaves keys visible and applies `encrypted_regex` to values whose key names match the
-expression ([SOPS reference](https://getsops.io/docs/reference/)). The current ACL's
-sensitive values are group membership identifiers. No email addresses, IP addresses,
-or hostnames are embedded directly in the rule selectors, so this migration does not
-need placeholder replacement.
+The SOPS `encrypted_regex` in `.sops.yaml` matches keys beginning with `group:` or
+`private-`. It encrypts group membership values and private host addresses while keeping
+the group names and host aliases visible as JSON keys. SOPS leaves keys visible and
+applies `encrypted_regex` to values whose key names match the expression
+([SOPS reference](https://getsops.io/docs/reference/)). Put private IP addresses or
+CIDR ranges in `hosts` under a `private-*` alias. Keep rule selectors, tags, groups,
+and tests in plaintext for review.
 
-Only `group:*` values are currently covered by the encryption rule. If a new sensitive
-field is added, update the regex and verify that its values are encrypted before
-committing it.
+## Codex Cloud identity
+
+Codex Cloud uses the dedicated `tag:codex` identity. Its grant permits only TCP 6443
+and TCP 50000 to the encrypted `private-control-plane` host alias. It has no SSH rule
+and no access to user-owned devices or other tagged services. User terminals continue
+to use their user identity and existing grants.
+
+Configure the Codex Cloud environment's Tailscale VPN with a dedicated auth key that
+has the `tag:codex` tag and both **Reusable** and **Ephemeral** enabled. Do not reuse a
+personal or untagged key. The tag makes the device tag-owned instead of user-owned;
+ephemeral nodes are removed after disconnecting. Tailscale auth keys expire within
+90 days, so replace the environment credential before its expiry. The key can register
+multiple Codex nodes, but the ACL limits those nodes to the two control-plane ports
+above. If the environment exposes the credential to task processes, those processes
+can use it to register another similarly restricted node.
+
+Apply the policy before creating the tagged key so `tag:codex` exists in the tailnet.
+After replacing the environment credential, verify the new Codex device has the
+`tag:codex` identity and no user owner. Remove obsolete Codex devices individually
+after confirming they are old Codex nodes; do not remove other devices owned by the
+same user.
 
 ## Merge and validation
 
@@ -80,8 +98,9 @@ To edit encrypted values, use SOPS' editor with the local key supplied through f
 mise exec -- fnox --non-interactive --if-missing error --no-daemon exec sops secrets.sops.json
 ```
 
-To create or restructure the encrypted groups object, prepare `secrets.json` with
-restrictive permissions. It is ignored by Git. Then encrypt it using the public age
+To create or restructure the encrypted data, prepare `secrets.json` with restrictive
+permissions. It is ignored by Git. Include the `groups` object and a `hosts` object with
+private addresses keyed by `private-*` aliases, then encrypt it using the public age
 recipient:
 
 ```sh

@@ -114,6 +114,18 @@
     },
     {
       "src": [
+        "tag:codex"
+      ],
+      "dst": [
+        "private-control-plane"
+      ],
+      "ip": [
+        "tcp:6443",
+        "tcp:50000"
+      ]
+    },
+    {
+      "src": [
         "tag:k8s"
       ],
       "dst": [
