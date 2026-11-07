@@ -53,9 +53,10 @@ same user.
 The OCI Minecraft proxy and CUBE backend use separate service tags:
 `tag:minecraft-proxy` and `tag:minecraft-backend`. The proxy can reach the CUBE
 backend on TCP 25565 and the Kubernetes Vanilla server on TCP 25565. Admin devices
-retain network and Tailscale SSH access to both tagged hosts. Keep the proxy grants
-limited to those game paths; do not reuse `tag:oci-edge`, which has broader TCP access
-to Kubernetes services.
+retain network access and Tailscale SSH access as non-root users to both tagged hosts;
+`root` is intentionally not permitted over Tailscale SSH. Keep the proxy grants limited
+to those game paths; do not reuse `tag:oci-edge`, which has broader TCP access to
+Kubernetes services.
 
 ## Merge and validation
 

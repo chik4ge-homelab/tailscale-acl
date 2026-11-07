@@ -37,8 +37,7 @@
         "tag:minecraft-backend"
       ],
       "users": [
-        "autogroup:nonroot",
-        "root"
+        "autogroup:nonroot"
       ]
     }
   ]
