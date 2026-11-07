@@ -61,6 +61,17 @@
         "group:admin"
       ],
       "dst": [
+        "tag:gatus"
+      ],
+      "ip": [
+        "tcp:8080"
+      ]
+    },
+    {
+      "src": [
+        "group:admin"
+      ],
+      "dst": [
         "tag:k8s"
       ],
       "ip": [

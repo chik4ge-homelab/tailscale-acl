@@ -149,9 +149,10 @@ Group membership is not included, and unrecognized selectors use generic labels.
 edges are grants and orange edges are SSH; green nodes are groups and blue nodes are tags.
 
 Grants are deny-by-default and additive: every permitted flow must be listed, and a
-broader grant is not narrowed by a more specific one. Keep access from untagged admin
-devices scoped to explicit destinations and ports; Tailscale SSH also needs a matching
-network grant for TCP port 22 in addition to its `ssh` rule.
+broader grant is not narrowed by a more specific one. Admin devices can reach the Gatus
+dashboard and API on TCP 8080; access to its other ports remains denied. Keep access
+from untagged admin devices scoped to explicit destinations and ports; Tailscale SSH
+also needs a matching network grant for TCP port 22 in addition to its `ssh` rule.
 
 See [Tailscale GitOps for GitHub Actions](https://tailscale.com/docs/integrations/github/gitops)
 and [Tailscale policy syntax](https://tailscale.com/docs/reference/syntax/policy-file).

@@ -7,6 +7,7 @@
         "tag:k8s:443",
         "tag:k8s:25565",
         "tag:ark-server:22",
+        "tag:gatus:8080",
         "tag:gatus-deploy:22",
         "tag:proxmox:8006",
         "tag:oci-edge:22"
@@ -17,6 +18,8 @@
         "tag:truenas:445",
         "tag:proxmox:22",
         "tag:oci-edge:443",
+        "tag:gatus:22",
+        "tag:gatus:443",
         "private-control-plane:6443",
         "private-control-plane:50000",
         "tag:codex:22",
