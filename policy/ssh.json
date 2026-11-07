@@ -26,6 +26,20 @@
       "users": [
         "ubuntu"
       ]
+    },
+    {
+      "action": "accept",
+      "src": [
+        "group:admin"
+      ],
+      "dst": [
+        "tag:minecraft-proxy",
+        "tag:minecraft-backend"
+      ],
+      "users": [
+        "autogroup:nonroot",
+        "root"
+      ]
     }
   ]
 }

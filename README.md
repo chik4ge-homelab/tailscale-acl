@@ -48,6 +48,15 @@ After replacing the environment credential, verify the new Codex device has the
 after confirming they are old Codex nodes; do not remove other devices owned by the
 same user.
 
+## Minecraft public ingress
+
+The OCI Minecraft proxy and CUBE backend use separate service tags:
+`tag:minecraft-proxy` and `tag:minecraft-backend`. The proxy can reach the CUBE
+backend on TCP 25565 and the Kubernetes Vanilla server on TCP 25565. Admin devices
+retain network and Tailscale SSH access to both tagged hosts. Keep the proxy grants
+limited to those game paths; do not reuse `tag:oci-edge`, which has broader TCP access
+to Kubernetes services.
+
 ## Merge and validation
 
 Each plaintext source is a JSON object with a distinct Tailscale top-level key. The
