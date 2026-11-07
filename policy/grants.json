@@ -81,6 +81,40 @@
     },
     {
       "src": [
+        "tag:minecraft-proxy"
+      ],
+      "dst": [
+        "tag:minecraft-backend"
+      ],
+      "ip": [
+        "tcp:25565"
+      ]
+    },
+    {
+      "src": [
+        "tag:minecraft-proxy"
+      ],
+      "dst": [
+        "tag:k8s"
+      ],
+      "ip": [
+        "tcp:25565"
+      ]
+    },
+    {
+      "src": [
+        "group:admin"
+      ],
+      "dst": [
+        "tag:minecraft-proxy",
+        "tag:minecraft-backend"
+      ],
+      "ip": [
+        "tcp:22"
+      ]
+    },
+    {
+      "src": [
         "group:admin"
       ],
       "dst": [
