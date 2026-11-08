@@ -35,6 +35,17 @@
     },
     {
       "src": [
+        "group:admin"
+      ],
+      "dst": [
+        "tag:truenas"
+      ],
+      "ip": [
+        "tcp:22"
+      ]
+    },
+    {
+      "src": [
         "tag:ci",
         "group:admin"
       ],
