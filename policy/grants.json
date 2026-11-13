@@ -41,7 +41,8 @@
         "tag:truenas"
       ],
       "ip": [
-        "tcp:22"
+        "tcp:22",
+        "tcp:445"
       ]
     },
     {

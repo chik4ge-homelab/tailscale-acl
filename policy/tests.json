@@ -12,12 +12,12 @@
         "tag:proxmox:8006",
         "tag:oci-edge:22",
         "tag:minecraft-proxy:22",
-        "tag:minecraft-backend:22"
+        "tag:minecraft-backend:22",
+        "tag:truenas:445"
       ],
       "deny": [
         "group:admin:443",
         "tag:k8s:22",
-        "tag:truenas:445",
         "tag:proxmox:22",
         "tag:oci-edge:443",
         "tag:gatus:22",
@@ -27,7 +27,8 @@
         "tag:codex:22",
         "tag:codex:443",
         "tag:minecraft-backend:25565",
-        "tag:minecraft-proxy:25565"
+        "tag:minecraft-proxy:25565",
+        "tag:truenas:2049"
       ]
     },
     {
